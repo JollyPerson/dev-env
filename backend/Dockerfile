@@ -14,5 +14,5 @@ COPY . /django_app
 
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /django_app
 USER appuser
-
+CMD ["ls"]
 CMD ["python", "manage.py", "runserver"]
