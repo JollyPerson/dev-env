@@ -1,0 +1,53 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16.9-alpine
+    hostname: localhost
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - database
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    restart: unless-stopped
+    volumes:
+      - ./docker/pgAdmin/servers.json:/pgadmin4/servers.json
+    networks:
+      - database
+
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    networks:
+      - database
+    command: sleep infinity
+
+volumes:
+  postgres-data:
+
+networks:
+  database:
+    driver: bridge
